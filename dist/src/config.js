@@ -21,3 +21,8 @@ export function validateConfig(value) {
 }
 export function loadConfig(file) { return validateConfig(JSON.parse(fs.readFileSync(file, "utf8"))); }
 export function expandHome(file) { return file.startsWith("~") ? path.join(process.env.USERPROFILE ?? process.env.HOME ?? ".", file.slice(2)) : file; }
+export function selectServer(config, name) {
+    if (!config.servers[name])
+        throw new Error(`unknown server: ${name}`);
+    return { ...config, servers: { [name]: config.servers[name] } };
+}

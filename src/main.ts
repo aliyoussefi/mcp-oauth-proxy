@@ -1,17 +1,24 @@
 import fs from "node:fs";
 import readline from "node:readline";
-import { loadConfig } from "./config.js";
+import { loadConfig, selectServer } from "./config.js";
 import { FileTokenStore } from "./token-store.js";
 import { OAuthTokenProvider } from "./oauth-provider.js";
 import { ProxyRouter } from "./proxy.js";
 import { runSetup } from "./setup.js";
 const setup = process.argv.includes("--setup");
 const arg=process.argv.indexOf("--config"); const file=arg>=0?process.argv[arg+1]:"config.json";
+const serverArg=process.argv.indexOf("--server");
+const providerArg=process.argv.indexOf("--provider");
+if (serverArg >= 0 && providerArg >= 0 && process.argv[serverArg + 1] !== process.argv[providerArg + 1]) {
+  throw new Error("--server and --provider must name the same upstream when both are supplied");
+}
+const selectedServer = serverArg >= 0 ? process.argv[serverArg + 1] : providerArg >= 0 ? process.argv[providerArg + 1] : undefined;
 if (setup) {
   await runSetup(file);
   process.exit(0);
 }
-const config=loadConfig(file);
+const loadedConfig=loadConfig(file);
+const config=selectedServer ? selectServer(loadedConfig, selectedServer) : loadedConfig;
 const defaultFile=process.env.MCP_OAUTH_PROXY_TOKEN_FILE??"~/.mcp-oauth-proxy/tokens.json";
 const store=new FileTokenStore(Object.fromEntries(Object.entries(config.servers).map(([name,c])=>[name,c.tokens?.file??defaultFile])),false);
 const providers: Record<string, OAuthTokenProvider> = {};

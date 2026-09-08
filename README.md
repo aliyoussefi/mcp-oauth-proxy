@@ -63,6 +63,18 @@ Each entry under `servers` points to one upstream MCP endpoint. Multiple entries
 can be configured in the same file, and their tools are exposed to Scout with
 names such as `slack/search_messages` and `salesforce/query_records`.
 
+To register each upstream as a separate Scout MCP server while sharing the same
+config file, pass the upstream name with `--server`:
+
+```text
+npx -y github:aliyoussefi/mcp-oauth-proxy --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server dataverse
+npx -y github:aliyoussefi/mcp-oauth-proxy --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server salesforce
+```
+
+`--provider` is accepted as an alias for `--server`. The selected process
+exposes only that named upstream. Omitting the selector keeps the original
+multi-upstream behavior.
+
 Set `MCP_OAUTH_PROXY_TOKEN_<SERVERNAME>` for explicit access-token injection (server name uppercased, non-alphanumeric replaced with `_`). If `clientId`, `authorizationEndpoint`, and `tokenEndpoint` are configured, the first unauthenticated tool request opens a browser for OAuth authorization-code + PKCE. The provider must allow a loopback redirect under `http://127.0.0.1:<port>/oauth/callback`. Refresh tokens are persisted encrypted. Windows uses DPAPI through PowerShell. On other platforms, set `MCP_OAUTH_PROXY_KEY` to a 32-byte base64 key; persistence fails rather than writing plaintext.
 
 The proxy refreshes access tokens silently until the provider requires reauthentication. It does not store client secrets in the configuration file. `allowPlaintextRefreshToken` is retained for configuration compatibility but is intentionally ignored by the default implementation.

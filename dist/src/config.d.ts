@@ -25,3 +25,4 @@ export interface ProxyConfig {
 export declare function validateConfig(value: unknown): ProxyConfig;
 export declare function loadConfig(file: string): ProxyConfig;
 export declare function expandHome(file: string): string;
+export declare function selectServer(config: ProxyConfig, name: string): ProxyConfig;

@@ -20,3 +20,7 @@ export function validateConfig(value: unknown): ProxyConfig {
 }
 export function loadConfig(file: string): ProxyConfig { return validateConfig(JSON.parse(fs.readFileSync(file, "utf8"))); }
 export function expandHome(file: string): string { return file.startsWith("~") ? path.join(process.env.USERPROFILE ?? process.env.HOME ?? ".", file.slice(2)) : file; }
+export function selectServer(config: ProxyConfig, name: string): ProxyConfig {
+  if (!config.servers[name]) throw new Error(`unknown server: ${name}`);
+  return { ...config, servers: { [name]: config.servers[name] } };
+}
