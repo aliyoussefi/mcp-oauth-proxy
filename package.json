@@ -1,0 +1,11 @@
+{
+  "name": "mcp-oauth-proxy",
+  "version": "0.1.0",
+  "description": "Local stdio MCP OAuth-aware router for multiple HTTP MCP upstreams",
+  "type": "module",
+  "bin": { "mcp-oauth-proxy": "dist/src/main.js" },
+  "files": ["dist", "config.example.json", "README.md", "package.json", "tsconfig.json"],
+  "scripts": { "build": "tsc -p tsconfig.json", "prepare": "npm run build", "start": "node dist/src/main.js", "build:exe": "npm run build && pkg dist/src/main.js --targets node22-win-x64 --output dist/mcp-oauth-proxy.exe", "test": "npm run build && node --test dist/tests/*.test.js" },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "@types/node": "^22.0.0", "typescript": "^5.6.0", "@yao-pkg/pkg": "^6.22.0" }
+}
