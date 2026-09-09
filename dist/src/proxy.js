@@ -21,13 +21,14 @@ export class ProxyRouter {
             return undefined;
         if (rpc.method === "tools/list") {
             const selected = rpc.params?.server ? [rpc.params.server] : Object.keys(this.transports);
+            const namespace = Object.keys(this.transports).length > 1;
             const tools = [];
             for (const s of selected) {
                 if (!this.transports[s])
                     throw new Error(`unknown upstream server: ${s}`);
                 const result = await this.transports[s].request({ jsonrpc: "2.0", id: rpc.id ?? 1, method: "tools/list", params: rpc.params });
                 for (const t of result?.result?.tools ?? [])
-                    tools.push({ ...t, name: `${s}/${t.name}` });
+                    tools.push({ ...t, name: namespace ? `${s}/${t.name}` : t.name });
             }
             return { jsonrpc: "2.0", id: rpc.id, result: { tools } };
         }

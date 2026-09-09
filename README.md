@@ -80,6 +80,51 @@ npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --config "%USERPROFILE%\mcp-oau
 `--provider` is accepted as an alias for `--server`. Omitting the selector
 keeps the multi-upstream behavior.
 
+When `--server` selects one upstream, the proxy exposes that upstream's native
+tool names without a prefix. This lets Scout keep separate MCP identities and
+call each tool directly. In aggregate mode, tools remain namespaced as
+`server/tool` to avoid collisions.
+
+Example with three named Scout MCP entries:
+
+```json
+{
+  "salesforce": {
+    "builtin": false,
+    "config": {
+      "name": "Salesforce",
+      "type": "command",
+      "command": "npx",
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "salesforce"],
+      "timeout": 300000
+    },
+    "tools": []
+  },
+  "slack": {
+    "builtin": false,
+    "config": {
+      "name": "Slack",
+      "type": "command",
+      "command": "npx",
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "slack"],
+      "timeout": 300000
+    },
+    "tools": []
+  },
+  "dataverse": {
+    "builtin": false,
+    "config": {
+      "name": "Dataverse",
+      "type": "command",
+      "command": "npx",
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "dataverse"],
+      "timeout": 300000
+    },
+    "tools": []
+  }
+}
+```
+
 ## Three-upstream example
 
 The proxy can aggregate Salesforce, Slack, and Dataverse in one Scout process.
