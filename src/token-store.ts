@@ -14,14 +14,14 @@ export class FileTokenStore implements TokenProvider {
   private pathFor(server: string): string { return expandHome(typeof this.file === "string" ? this.file : (this.file[server] ?? "~/.mcp-oauth-proxy/tokens.json")); }
   private async read(server=""): Promise<Record<string,Tokens>> { try { return JSON.parse(await fs.readFile(this.pathFor(server),"utf8")); } catch (e:any) { if (e.code === "ENOENT") return {}; throw e; } }
   private async crypt(mode:"encrypt"|"decrypt", text:string): Promise<string> {
-    if (process.platform === "win32") { const result=await dpapi(mode === "encrypt" ? "protect":"unprotect", mode === "encrypt" ? Buffer.from(text,"utf8").toString("base64") : text); return mode === "encrypt" ? result : Buffer.from(result,"base64").toString("utf8"); }
+    if (process.platform === "win32") { const value=text.startsWith("dpapi:")?text.slice(6):text; const result=await dpapi(mode === "encrypt" ? "protect":"unprotect", mode === "encrypt" ? Buffer.from(text,"utf8").toString("base64") : value); return mode === "encrypt" ? `dpapi:${result}` : Buffer.from(result,"base64").toString("utf8"); }
     const keyRaw=process.env.MCP_OAUTH_PROXY_KEY; if (!keyRaw) throw new Error("MCP_OAUTH_PROXY_KEY is required for non-Windows encrypted token storage");
     const key=Buffer.from(keyRaw,"base64"); if (key.length!==32) throw new Error("MCP_OAUTH_PROXY_KEY must be 32-byte base64");
     if (mode === "encrypt") { const iv=crypto.randomBytes(12), c=crypto.createCipheriv("aes-256-gcm",key,iv); const body=Buffer.concat([c.update(text,"utf8"),c.final()]); return `gcm:${iv.toString("base64")}:${c.getAuthTag().toString("base64")}:${body.toString("base64")}`; }
     const [,ivS,tagS,bodyS]=text.split(":"); const d=crypto.createDecipheriv("aes-256-gcm",key,Buffer.from(ivS,"base64")); d.setAuthTag(Buffer.from(tagS,"base64")); return Buffer.concat([d.update(Buffer.from(bodyS,"base64")),d.final()]).toString("utf8");
   }
-  async get(server:string){ const all=await this.read(server), v=all[server]; if(!v)return undefined; return { ...v, accessToken:v.accessToken?await this.crypt("decrypt",v.accessToken):undefined, refreshToken:v.refreshToken?await this.crypt("decrypt",v.refreshToken):undefined, clientSecret:v.clientSecret?await this.crypt("decrypt",v.clientSecret):undefined }; }
+  private async decryptAccessToken(value:string): Promise<string> { try { return await this.crypt("decrypt",value); } catch (error) { if (!value.startsWith("dpapi:") && !value.startsWith("gcm:")) return value; throw error; } }
+  async get(server:string){ const all=await this.read(server), v=all[server]; if(!v)return undefined; return { ...v, accessToken:v.accessToken?await this.decryptAccessToken(v.accessToken):undefined, refreshToken:v.refreshToken?await this.crypt("decrypt",v.refreshToken):undefined, clientSecret:v.clientSecret?await this.crypt("decrypt",v.clientSecret):undefined }; }
   async set(server:string,t:Tokens){ if(t.refreshToken && this.allowPlaintextRefreshToken) { /* explicit unsafe hook */ } const all=await this.read(server); const previous=all[server]; all[server]={...t,accessToken:t.accessToken?await this.crypt("encrypt",t.accessToken):undefined,refreshToken:t.refreshToken?await this.crypt("encrypt",t.refreshToken):undefined,clientSecret:t.clientSecret?await this.crypt("encrypt",t.clientSecret):previous?.clientSecret}; const f=this.pathFor(server); await fs.mkdir(path.dirname(f),{recursive:true}); await fs.writeFile(f,JSON.stringify(all,null,2),{mode:0o600}); }
 }
-
 

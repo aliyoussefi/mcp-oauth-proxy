@@ -25,8 +25,9 @@ export class FileTokenStore {
     } }
     async crypt(mode, text) {
         if (process.platform === "win32") {
-            const result = await dpapi(mode === "encrypt" ? "protect" : "unprotect", mode === "encrypt" ? Buffer.from(text, "utf8").toString("base64") : text);
-            return mode === "encrypt" ? result : Buffer.from(result, "base64").toString("utf8");
+            const value = text.startsWith("dpapi:") ? text.slice(6) : text;
+            const result = await dpapi(mode === "encrypt" ? "protect" : "unprotect", mode === "encrypt" ? Buffer.from(text, "utf8").toString("base64") : value);
+            return mode === "encrypt" ? `dpapi:${result}` : Buffer.from(result, "base64").toString("utf8");
         }
         const keyRaw = process.env.MCP_OAUTH_PROXY_KEY;
         if (!keyRaw)
@@ -44,7 +45,15 @@ export class FileTokenStore {
         d.setAuthTag(Buffer.from(tagS, "base64"));
         return Buffer.concat([d.update(Buffer.from(bodyS, "base64")), d.final()]).toString("utf8");
     }
+    async decryptAccessToken(value) { try {
+        return await this.crypt("decrypt", value);
+    }
+    catch (error) {
+        if (!value.startsWith("dpapi:") && !value.startsWith("gcm:"))
+            return value;
+        throw error;
+    } }
     async get(server) { const all = await this.read(server), v = all[server]; if (!v)
-        return undefined; return { ...v, accessToken: v.accessToken ? await this.crypt("decrypt", v.accessToken) : undefined, refreshToken: v.refreshToken ? await this.crypt("decrypt", v.refreshToken) : undefined, clientSecret: v.clientSecret ? await this.crypt("decrypt", v.clientSecret) : undefined }; }
+        return undefined; return { ...v, accessToken: v.accessToken ? await this.decryptAccessToken(v.accessToken) : undefined, refreshToken: v.refreshToken ? await this.crypt("decrypt", v.refreshToken) : undefined, clientSecret: v.clientSecret ? await this.crypt("decrypt", v.clientSecret) : undefined }; }
     async set(server, t) { if (t.refreshToken && this.allowPlaintextRefreshToken) { /* explicit unsafe hook */ } const all = await this.read(server); const previous = all[server]; all[server] = { ...t, accessToken: t.accessToken ? await this.crypt("encrypt", t.accessToken) : undefined, refreshToken: t.refreshToken ? await this.crypt("encrypt", t.refreshToken) : undefined, clientSecret: t.clientSecret ? await this.crypt("encrypt", t.clientSecret) : previous?.clientSecret }; const f = this.pathFor(server); await fs.mkdir(path.dirname(f), { recursive: true }); await fs.writeFile(f, JSON.stringify(all, null, 2), { mode: 0o600 }); }
 }

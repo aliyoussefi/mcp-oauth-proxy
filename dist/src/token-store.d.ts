@@ -15,6 +15,7 @@ export declare class FileTokenStore implements TokenProvider {
     private pathFor;
     private read;
     private crypt;
+    private decryptAccessToken;
     get(server: string): Promise<{
         accessToken: string | undefined;
         refreshToken: string | undefined;
