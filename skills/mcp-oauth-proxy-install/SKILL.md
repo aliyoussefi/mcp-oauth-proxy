@@ -1,3 +1,8 @@
+---
+name: "mcp-oauth-proxy-install"
+description: "Install and prepare the generic MCP OAuth proxy package for Microsoft Scout without configuring a provider."
+---
+
 # MCP OAuth Proxy Install
 
 Perform the installation and preparation phase for the generic MCP OAuth proxy on Windows.

@@ -1,7 +1,7 @@
 {
   "name": "mcp-oauth-proxy",
   "description": "Generic MCP OAuth proxy with Scout setup skills",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "repository": "https://github.com/aliyoussefi/mcp-oauth-proxy",
   "license": "MIT",
   "keywords": [

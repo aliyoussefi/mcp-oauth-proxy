@@ -1,6 +1,6 @@
 {
   "name": "mcp-oauth-proxy",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Local stdio MCP OAuth-aware router for multiple HTTP MCP upstreams",
   "type": "module",
   "main": "dist/src/main.js",

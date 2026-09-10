@@ -1,3 +1,8 @@
+---
+name: "mcp-oauth-proxy-add-server"
+description: "Add one MCP server to the generic OAuth proxy using URL-first discovery, Dynamic Client Registration, PKCE authentication, and a separate Scout MCP entry."
+---
+
 # MCP OAuth Proxy Add Server
 
 Perform an end-to-end setup of one individual MCP server behind the generic MCP OAuth proxy. The user should normally need to provide only a friendly server name and MCP URL.
