@@ -27,6 +27,12 @@ Publish a release tag, then configure Scout to launch it with `npx`:
 The target machine needs Node.js 20 or later. The repository is also usable
 with a public npm package if one is published later.
 
+The repository includes two Scout skills under `skills/`:
+
+- `mcp-oauth-proxy-install` prepares the package and local configuration.
+- `mcp-oauth-proxy-add-server` adds one MCP by URL, performs OAuth discovery,
+  attempts Dynamic Client Registration, and configures a separate Scout entry.
+
 ## Setup
 
 ```powershell
