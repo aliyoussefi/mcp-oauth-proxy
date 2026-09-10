@@ -16,7 +16,7 @@ Publish a release tag, then configure Scout to launch it with `npx`:
   "command": "npx",
   "args": [
     "-y",
-    "github:aliyoussefi/mcp-oauth-proxy#v0.1.0",
+    "github:aliyoussefi/mcp-oauth-proxy",
     "--config",
     "%USERPROFILE%\\mcp-oauth-proxy\\config.json"
   ],
@@ -53,13 +53,13 @@ mcp-oauth-proxy.exe --setup --config "$env:USERPROFILE\mcp-oauth-proxy\config.js
 Scout can also launch the package directly:
 
 ```text
-npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --config "%USERPROFILE%\mcp-oauth-proxy\config.json"
+npx -y github:aliyoussefi/mcp-oauth-proxy --config "%USERPROFILE%\mcp-oauth-proxy\config.json"
 ```
 
 Run the same command with `--setup` once to create the configuration:
 
 ```text
-npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --setup --config "%USERPROFILE%\mcp-oauth-proxy\config.json"
+npx -y github:aliyoussefi/mcp-oauth-proxy --setup --config "%USERPROFILE%\mcp-oauth-proxy\config.json"
 ```
 
 The wizard asks for the MCP URL and values that cannot be discovered
@@ -82,8 +82,8 @@ To register each upstream as a separate Scout MCP server while sharing one
 config file, pass the upstream name with `--server`:
 
 ```text
-npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server dataverse
-npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server salesforce
+npx -y github:aliyoussefi/mcp-oauth-proxy --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server dataverse
+npx -y github:aliyoussefi/mcp-oauth-proxy --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server salesforce
 ```
 
 `--provider` is accepted as an alias for `--server`. Omitting the selector
@@ -104,7 +104,7 @@ Example with three named Scout MCP entries:
       "name": "Salesforce",
       "type": "command",
       "command": "npx",
-      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "salesforce"],
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "salesforce"],
       "timeout": 300000
     },
     "tools": []
@@ -115,7 +115,7 @@ Example with three named Scout MCP entries:
       "name": "Slack",
       "type": "command",
       "command": "npx",
-      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "slack"],
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "slack"],
       "timeout": 300000
     },
     "tools": []
@@ -126,7 +126,7 @@ Example with three named Scout MCP entries:
       "name": "Dataverse",
       "type": "command",
       "command": "npx",
-      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy#v0.2.1", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "dataverse"],
+      "args": ["-y", "github:aliyoussefi/mcp-oauth-proxy", "--config", "%USERPROFILE%\\mcp-oauth-proxy\\config.json", "--server", "dataverse"],
       "timeout": 300000
     },
     "tools": []
