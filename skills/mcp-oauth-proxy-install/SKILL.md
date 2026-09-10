@@ -10,8 +10,8 @@ Perform the installation and preparation phase for the generic MCP OAuth proxy o
 ## Published package
 
 - Repository: https://github.com/aliyoussefi/mcp-oauth-proxy
-- Release: v0.3.1
-- Launch command: `npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.1`
+- Release: v0.3.4
+- Launch command: `npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.4`
 - Provider config: `%USERPROFILE%\mcp-oauth-proxy\config.json`
 
 ## Workflow

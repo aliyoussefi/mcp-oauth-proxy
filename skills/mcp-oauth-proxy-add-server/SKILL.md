@@ -10,8 +10,8 @@ Perform an end-to-end setup of one individual MCP server behind the generic MCP 
 ## Published package
 
 - Repository: https://github.com/aliyoussefi/mcp-oauth-proxy
-- Release: v0.3.1
-- Launch command: `npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.1`
+- Release: v0.3.4
+- Launch command: `npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.4`
 - Provider config: `%USERPROFILE%\mcp-oauth-proxy\config.json`
 - Scout config: `%USERPROFILE%\.scout\m-mcp-servers.json`
 - OAuth callback: `http://localhost:8765/oauth/callback`
@@ -28,7 +28,7 @@ Perform an end-to-end setup of one individual MCP server behind the generic MCP 
 8. Add or replace only one Scout MCP entry in `%USERPROFILE%\.scout\m-mcp-servers.json`, preserving all unrelated entries. Use the provider name as the Scout MCP name and launch:
 
    ```text
-   npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.1 --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server <provider-name>
+   npx -y github:aliyoussefi/mcp-oauth-proxy#v0.3.4 --config "%USERPROFILE%\mcp-oauth-proxy\config.json" --server <provider-name>
    ```
 
    Set timeout to 300000 and tools to [].
