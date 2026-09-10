@@ -10,6 +10,7 @@ export interface ServerConfig {
         issuer?: string;
         authorizationEndpoint?: string;
         tokenEndpoint?: string;
+        registrationEndpoint?: string;
         deviceCodeEndpoint?: string;
         redirectUri?: string;
     };

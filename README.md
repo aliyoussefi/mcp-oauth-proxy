@@ -56,9 +56,12 @@ Run the same command with `--setup` once to create the configuration:
 npx -y github:aliyoussefi/mcp-oauth-proxy#v0.1.0 --setup --config "%USERPROFILE%\mcp-oauth-proxy\config.json"
 ```
 
-The wizard asks for the MCP URL, public OAuth client ID, and values that
-cannot be discovered automatically. It never asks for a password or token.
-Run it once for each server name, such as `dataverse` and `salesforce`.
+The wizard asks for the MCP URL and values that cannot be discovered
+automatically. It discovers OAuth metadata and attempts Dynamic Client
+Registration for a public PKCE client. If the authorization server does not
+support registration, it asks for a public OAuth client ID. It never asks for a
+password or token. Run it once for each server name, such as `dataverse` and
+`salesforce`.
 Choose `auto` to prefer device-code sign-in when available, `browser` for
 authorization-code plus PKCE, or `device-code` to require device-code sign-in.
 
@@ -189,8 +192,10 @@ with the server name uppercased and non-alphanumeric characters replaced by
 the first unauthenticated tool request opens browser OAuth using PKCE.
 
 The provider must allow a loopback redirect under
-`http://127.0.0.1:<port>/oauth/callback`. Refresh tokens, access tokens, and
-client secrets are persisted encrypted. Windows uses DPAPI through PowerShell.
+`http://127.0.0.1:<port>/oauth/callback`. Authorization servers that support
+OAuth Dynamic Client Registration can complete setup with only the MCP URL.
+Others require a pre-registered public client ID. Refresh tokens, access
+tokens, and client secrets are persisted encrypted. Windows uses DPAPI through PowerShell.
 On other platforms, set `MCP_OAUTH_PROXY_KEY` to a 32-byte base64 key.
 Persistence fails rather than writing plaintext.
 

@@ -4,11 +4,11 @@ import path from "node:path";
 import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { loadConfig, ProxyConfig, ServerConfig } from "./config.js";
-import { FileTokenStore } from "./token-store.js";
 
 type Discovery = {
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
+  registrationEndpoint?: string;
   scopes?: string[];
 };
 
@@ -50,6 +50,7 @@ async function discover(endpoint: string): Promise<Discovery> {
       return {
         authorizationEndpoint: typeof metadata.authorization_endpoint === "string" ? metadata.authorization_endpoint : undefined,
         tokenEndpoint: typeof metadata.token_endpoint === "string" ? metadata.token_endpoint : undefined,
+        registrationEndpoint: typeof metadata.registration_endpoint === "string" ? metadata.registration_endpoint : undefined,
         scopes: Array.isArray(metadata.scopes_supported)
           ? metadata.scopes_supported.filter((v): v is string => typeof v === "string")
           : undefined,
@@ -59,6 +60,29 @@ async function discover(endpoint: string): Promise<Discovery> {
     }
   }
   return {};
+}
+
+async function registerPublicClient(
+  endpoint: string,
+  redirectUri: string,
+  scopes: string[],
+): Promise<string | undefined> {
+  const body: Record<string, unknown> = {
+    client_name: "MCP OAuth Proxy",
+    redirect_uris: [redirectUri],
+    grant_types: ["authorization_code", "refresh_token"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "none",
+  };
+  if (scopes.length) body.scope = scopes.join(" ");
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) return undefined;
+  const value = await response.json() as Record<string, unknown>;
+  return typeof value.client_id === "string" && value.client_id ? value.client_id : undefined;
 }
 
 function writeConfig(file: string, config: ProxyConfig): void {
@@ -81,8 +105,6 @@ export async function runSetup(file: string): Promise<void> {
     const discovery = await discover(endpoint);
     const authorizationEndpoint = await ask(rl, "Authorization URL", discovery.authorizationEndpoint);
     const tokenEndpoint = await ask(rl, "Token URL", discovery.tokenEndpoint);
-    const clientId = await ask(rl, "Public OAuth client ID");
-    const clientSecret = await ask(rl, "OAuth client secret (stored encrypted; leave blank if not required)");
     const discoveredScopes = discovery.scopes?.join(" ");
     const scopeText = await ask(rl, "OAuth scopes (space-separated)", discoveredScopes);
     const flowChoice = await ask(rl, "Sign-in method (auto, browser, or device-code)", "auto");
@@ -93,6 +115,16 @@ export async function runSetup(file: string): Promise<void> {
     const redirectUri = flowChoice === "device-code"
       ? undefined
       : await ask(rl, "Browser callback URL", "http://localhost:8765/oauth/callback");
+    const scopes = scopeText ? scopeText.split(/\s+/) : [];
+    let clientId: string | undefined;
+    if (discovery.registrationEndpoint) {
+      console.log("Attempting Dynamic Client Registration for a public PKCE client...");
+      clientId = await registerPublicClient(discovery.registrationEndpoint, redirectUri ?? "http://localhost:8765/oauth/callback", scopes);
+      if (clientId) console.log("Dynamic Client Registration succeeded.");
+    }
+    if (!clientId) {
+      clientId = await ask(rl, "Public OAuth client ID (required when Dynamic Client Registration is unavailable)");
+    }
     if (!tokenEndpoint || !clientId || (flowChoice === "browser" && !authorizationEndpoint) ||
         (flowChoice === "device-code" && !deviceCodeEndpoint) ||
         (flowChoice === "auto" && !authorizationEndpoint && !deviceCodeEndpoint) ||
@@ -106,11 +138,12 @@ export async function runSetup(file: string): Promise<void> {
           endpoint,
           transport,
           clientId,
-          scopes: scopeText ? scopeText.split(/\s+/) : [],
+          scopes,
           auth: {
             flow: flowChoice,
             authorizationEndpoint,
             tokenEndpoint,
+            ...(discovery.registrationEndpoint ? { registrationEndpoint: discovery.registrationEndpoint } : {}),
             ...(deviceCodeEndpoint ? { deviceCodeEndpoint } : {}),
             ...(redirectUri ? { redirectUri } : {}),
           },
@@ -119,10 +152,6 @@ export async function runSetup(file: string): Promise<void> {
       },
     };
     writeConfig(file, config);
-    if (clientSecret) {
-      const tokenFile = `~/.mcp-oauth-proxy/${serverName}-tokens.json`;
-      await new FileTokenStore(tokenFile, false).set(serverName, { clientSecret });
-    }
     console.log(`Saved configuration to ${file}`);
     console.log("The first Scout tools/list call will open a browser for sign-in.");
   } finally {
