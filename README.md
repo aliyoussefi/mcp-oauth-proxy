@@ -211,6 +211,19 @@ Client secrets are not stored in configuration files.
 Tools are namespaced as `server/tool`. Calls may also specify
 `{ "server": "name", "name": "tool" }`.
 
+## Metadata-only audit logging
+
+Audit logging is disabled by default. Set `MCP_PROXY_AUDIT_LOG` to a local
+JSONL path to record tool-call metadata only:
+
+```text
+MCP_PROXY_AUDIT_LOG=%USERPROFILE%\.mcp-oauth-proxy\audit.jsonl
+```
+
+Each event includes the timestamp, upstream server name, tool name, status, and
+duration. Tool arguments, results, headers, OAuth values, and business data are
+never written.
+
 ## Portable executable
 
 ```powershell

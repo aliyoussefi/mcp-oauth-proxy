@@ -1,9 +1,12 @@
 import { HttpMcpTransport } from "./transport.js";
+import { AuditLogger } from "./audit.js";
 export class ProxyRouter {
     config;
+    audit;
     transports = {};
-    constructor(config, tokens) {
+    constructor(config, tokens, audit = new AuditLogger()) {
         this.config = config;
+        this.audit = audit;
         for (const [n, c] of Object.entries(config.servers))
             this.transports[n] = new HttpMcpTransport(c, tokens, n);
     }
@@ -36,8 +39,16 @@ export class ProxyRouter {
             const target = this.target(rpc.params, rpc.params?.name);
             if (!target.name)
                 throw new Error("tool name is required");
-            const result = await this.transports[target.server].request({ jsonrpc: "2.0", id: rpc.id ?? 1, method: "tools/call", params: { ...rpc.params, name: target.name, server: undefined } });
-            return { ...result, id: rpc.id };
+            const started = Date.now();
+            try {
+                const result = await this.transports[target.server].request({ jsonrpc: "2.0", id: rpc.id ?? 1, method: "tools/call", params: { ...rpc.params, name: target.name, server: undefined } });
+                this.audit.write({ timestamp: new Date().toISOString(), server: target.server, tool: target.name, status: result?.result?.isError ? "error" : "success", durationMs: Date.now() - started });
+                return { ...result, id: rpc.id };
+            }
+            catch (error) {
+                this.audit.write({ timestamp: new Date().toISOString(), server: target.server, tool: target.name, status: "error", durationMs: Date.now() - started });
+                throw error;
+            }
         }
         throw new Error(`unsupported method: ${rpc.method}`);
     }
