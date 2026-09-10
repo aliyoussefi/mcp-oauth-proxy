@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from "node:fs";
 import readline from "node:readline";
 import { loadConfig, selectServer } from "./config.js";

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import readline from "node:readline";
 import { loadConfig, selectServer } from "./config.js";
 import { FileTokenStore } from "./token-store.js";
